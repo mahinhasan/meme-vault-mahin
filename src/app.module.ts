@@ -22,7 +22,7 @@ import { Vote } from './entity/vote.entity';
         port: configService.get<number>('DB_PORT', 5432),
         username: configService.get<string>('DB_USERNAME', 'postgres'),
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
-        database: configService.get<string>('DB_NAME', 'meme_vault'),
+        database: configService.get<string>('DB_DATABASE', 'meme_vault'),
         entities: [Meme, Vote],
         synchronize: true, // For development; use migrations for production
       }),

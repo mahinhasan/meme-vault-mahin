@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Meme } from '../entity/meme.entity';
 import { Vote, VoteType } from '../entity/vote.entity';
 import { CreateMemeDto } from './dto/create-meme.dto';
@@ -14,6 +15,7 @@ export class MemeVaultService {
     @InjectRepository(Vote)
     private voteRepository: Repository<Vote>,
     private redisService: RedisService,
+    private configService: ConfigService,
   ) {}
 
   async createMeme(dto: CreateMemeDto): Promise<Meme> {
@@ -71,7 +73,8 @@ export class MemeVaultService {
       take: 10,
     });
 
-    await this.redisService.set(cacheKey, JSON.stringify(memes), 60); // 60s TTL
+    const ttl = this.configService.get<number>('TOP_MEMES_TTL', 60);
+    await this.redisService.set(cacheKey, JSON.stringify(memes), ttl); // Use TTL from config
     return memes;
   }
 
@@ -96,7 +99,8 @@ export class MemeVaultService {
       .limit(10)
       .getMany();
 
-    await this.redisService.set(cacheKey, JSON.stringify(trending), 30); // 30s TTL
+    const ttl = this.configService.get<number>('TRENDING_MEMES_TTL', 30);
+    await this.redisService.set(cacheKey, JSON.stringify(trending), ttl); // Use TTL from config
     return trending;
   }
 }
